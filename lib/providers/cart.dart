@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-import 'package:shop/providers/product.dart';
+import 'package:flutter/foundation.dart';
+import './product.dart';
 
 class CartItem {
   final String id;
@@ -35,7 +35,6 @@ class Cart with ChangeNotifier {
     _items.forEach((key, cartItem) {
       total += cartItem.price * cartItem.quantity;
     });
-
     return total;
   }
 
@@ -43,12 +42,12 @@ class Cart with ChangeNotifier {
     if (_items.containsKey(product.id)) {
       _items.update(
         product.id,
-        (item) => CartItem(
-          id: item.id,
+        (existingItem) => CartItem(
+          id: existingItem.id,
           productId: product.id,
-          title: item.title,
-          quantity: item.quantity + 1,
-          price: item.price,
+          title: existingItem.title,
+          quantity: existingItem.quantity + 1,
+          price: existingItem.price,
         ),
       );
     } else {
@@ -58,8 +57,31 @@ class Cart with ChangeNotifier {
           id: Random().nextDouble().toString(),
           productId: product.id,
           title: product.title,
-          quantity: 1,
           price: product.price,
+          quantity: 1,
+        ),
+      );
+    }
+
+    notifyListeners();
+  }
+
+  void removeSingleItem(productId) {
+    if(!_items.containsKey(productId)) {
+      return;
+    }
+
+    if(_items[productId].quantity == 1) {
+      _items.remove(productId);
+    } else {
+      _items.update(
+        productId,
+        (existingItem) => CartItem(
+          id: existingItem.id,
+          productId: existingItem.productId,
+          title: existingItem.title,
+          quantity: existingItem.quantity - 1,
+          price: existingItem.price,
         ),
       );
     }
